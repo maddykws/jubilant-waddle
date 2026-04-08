@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "AI-powered job search pipeline built on Claude Code",
   "scripts": {
+    "doctor": "node doctor.mjs",
     "verify": "node verify-pipeline.mjs",
     "normalize": "node normalize-statuses.mjs",
     "dedup": "node dedup-tracker.mjs",
@@ -12,22 +13,9 @@
     "update:check": "node update-system.mjs check",
     "update": "node update-system.mjs apply",
     "rollback": "node update-system.mjs rollback",
-    "apply": "node apply-agent.mjs",
-    "answer-bank": "node answer-bank.mjs generate",
-    "funding-radar": "node funding-radar.mjs",
-    "ghost-check": "node ghost-detector.mjs",
-    "ats-check": "node ats-optimizer.mjs",
-    "dashboard": "node funnel-dashboard.mjs",
-    "follow-up": "node follow-up-scheduler.mjs check",
-    "rejection-analysis": "node rejection-analyzer.mjs"
+    "liveness": "node check-liveness.mjs"
   },
-  "keywords": [
-    "ai",
-    "job-search",
-    "claude-code",
-    "career",
-    "automation"
-  ],
+  "keywords": ["ai", "job-search", "claude-code", "career", "automation"],
   "author": "Santiago Fernández de Valderrama <hi@santifer.io> (https://santifer.io)",
   "homepage": "https://santifer.io",
   "repository": {
@@ -36,15 +24,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.85.0",
-    "chalk": "^5.6.2",
-    "cli-table3": "^0.6.5",
-    "node-fetch": "^3.3.2",
-    "ora": "^6.3.1",
-    "p-limit": "^3.1.0",
-    "playwright": "^1.58.1",
-    "rss-parser": "^3.13.0",
-    "tiktoken": "^1.0.22",
-    "xml2js": "^0.6.2"
+    "playwright": "^1.58.1"
   }
 }

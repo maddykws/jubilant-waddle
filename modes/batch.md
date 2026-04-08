@@ -1,73 +1,73 @@
-# Mode: batch — Mass Offer Processing
+# Modo: batch — Procesamiento Masivo de Ofertas
 
-Two usage modes: **conductor --chrome** (navigates portals in real time) or **standalone** (script for already-collected URLs).
+Dos modos de uso: **conductor --chrome** (navega portales en tiempo real) o **standalone** (script para URLs ya recolectadas).
 
-## Architecture
+## Arquitectura
 
 ```
 Claude Conductor (claude --chrome --dangerously-skip-permissions)
   │
-  │  Chrome: navigates portals (logged-in sessions)
-  │  Reads DOM directly — user sees everything in real time
+  │  Chrome: navega portales (sesiones logueadas)
+  │  Lee DOM directo — el usuario ve todo en tiempo real
   │
-  ├─ Offer 1: reads JD from DOM + URL
+  ├─ Oferta 1: lee JD del DOM + URL
   │    └─► claude -p worker → report .md + PDF + tracker-line
   │
-  ├─ Offer 2: click next, reads JD + URL
+  ├─ Oferta 2: click siguiente, lee JD + URL
   │    └─► claude -p worker → report .md + PDF + tracker-line
   │
-  └─ Done: merge tracker-additions → applications.md + summary
+  └─ Fin: merge tracker-additions → applications.md + resumen
 ```
 
-Each worker is a child `claude -p` with a clean 200K token context. The conductor only orchestrates.
+Cada worker es un `claude -p` hijo con contexto limpio de 200K tokens. El conductor solo orquesta.
 
-## Files
+## Archivos
 
 ```
 batch/
-  batch-input.tsv               # URLs (by conductor or manual)
-  batch-state.tsv               # Progress (auto-generated, gitignored)
-  batch-runner.sh               # Standalone orchestrator script
-  batch-prompt.md               # Prompt template for workers
-  logs/                         # One log per offer (gitignored)
-  tracker-additions/            # Tracker lines (gitignored)
+  batch-input.tsv               # URLs (por conductor o manual)
+  batch-state.tsv               # Progreso (auto-generado, gitignored)
+  batch-runner.sh               # Script orquestador standalone
+  batch-prompt.md               # Prompt template para workers
+  logs/                         # Un log por oferta (gitignored)
+  tracker-additions/            # Líneas de tracker (gitignored)
 ```
 
-## Mode A: Conductor --chrome
+## Modo A: Conductor --chrome
 
-1. **Read state**: `batch/batch-state.tsv` → know what was already processed
-2. **Navigate portal**: Chrome → search URL
-3. **Extract URLs**: Read DOM of results → extract URL list → append to `batch-input.tsv`
-4. **For each pending URL**:
-   a. Chrome: click on the offer → read JD text from DOM
-   b. Save JD to `/tmp/batch-jd-{id}.txt`
-   c. Calculate next sequential REPORT_NUM
-   d. Run via Bash:
+1. **Leer estado**: `batch/batch-state.tsv` → saber qué ya se procesó
+2. **Navegar portal**: Chrome → URL de búsqueda
+3. **Extraer URLs**: Leer DOM de resultados → extraer lista de URLs → append a `batch-input.tsv`
+4. **Para cada URL pendiente**:
+   a. Chrome: click en la oferta → leer JD text del DOM
+   b. Guardar JD a `/tmp/batch-jd-{id}.txt`
+   c. Calcular siguiente REPORT_NUM secuencial
+   d. Ejecutar via Bash:
       ```bash
       claude -p --dangerously-skip-permissions \
         --append-system-prompt-file batch/batch-prompt.md \
-        "Process this offer. URL: {url}. JD: /tmp/batch-jd-{id}.txt. Report: {num}. ID: {id}"
+        "Procesa esta oferta. URL: {url}. JD: /tmp/batch-jd-{id}.txt. Report: {num}. ID: {id}"
       ```
-   e. Update `batch-state.tsv` (completed/failed + score + report_num)
-   f. Log to `logs/{report_num}-{id}.log`
-   g. Chrome: go back → next offer
-5. **Pagination**: If no more offers → click "Next" → repeat
-6. **Done**: Merge `tracker-additions/` → `applications.md` + summary
+   e. Actualizar `batch-state.tsv` (completed/failed + score + report_num)
+   f. Log a `logs/{report_num}-{id}.log`
+   g. Chrome: volver atrás → siguiente oferta
+5. **Paginación**: Si no hay más ofertas → click "Next" → repetir
+6. **Fin**: Merge `tracker-additions/` → `applications.md` + resumen
 
-## Mode B: Standalone script
+## Modo B: Script standalone
 
 ```bash
 batch/batch-runner.sh [OPTIONS]
 ```
 
-Options:
-- `--dry-run` — list pending without executing
-- `--retry-failed` — only retry failed ones
-- `--start-from N` — start from ID N
-- `--parallel N` — N workers in parallel
-- `--max-retries N` — attempts per offer (default: 2)
+Opciones:
+- `--dry-run` — lista pendientes sin ejecutar
+- `--retry-failed` — solo reintenta fallidas
+- `--start-from N` — empieza desde ID N
+- `--parallel N` — N workers en paralelo
+- `--max-retries N` — intentos por oferta (default: 2)
 
-## batch-state.tsv Format
+## Formato batch-state.tsv
 
 ```
 id	url	status	started_at	completed_at	report_num	score	error	retries
@@ -76,29 +76,29 @@ id	url	status	started_at	completed_at	report_num	score	error	retries
 3	https://...	pending	-	-	-	-	-	0
 ```
 
-## Resumability
+## Resumabilidad
 
-- If it dies → re-run → reads `batch-state.tsv` → skips completed
-- Lock file (`batch-runner.pid`) prevents double execution
-- Each worker is independent: failure at offer #47 doesn't affect others
+- Si muere → re-ejecutar → lee `batch-state.tsv` → skip completadas
+- Lock file (`batch-runner.pid`) previene ejecución doble
+- Cada worker es independiente: fallo en oferta #47 no afecta a las demás
 
 ## Workers (claude -p)
 
-Each worker receives `batch-prompt.md` as system prompt. It is self-contained.
+Cada worker recibe `batch-prompt.md` como system prompt. Es self-contained.
 
-The worker produces:
-1. Report `.md` in `reports/`
-2. PDF in `output/`
-3. Tracker line in `batch/tracker-additions/{id}.tsv`
-4. Result JSON via stdout
+El worker produce:
+1. Report `.md` en `reports/`
+2. PDF en `output/`
+3. Línea de tracker en `batch/tracker-additions/{id}.tsv`
+4. JSON de resultado por stdout
 
-## Error handling
+## Gestión de errores
 
 | Error | Recovery |
 |-------|----------|
-| Inaccessible URL | Worker fails → conductor marks `failed`, moves on |
-| JD behind login | Conductor tries to read DOM. If fails → `failed` |
-| Portal changes layout | Conductor reasons about HTML, adapts |
-| Worker crashes | Conductor marks `failed`, moves on. Retry with `--retry-failed` |
-| Conductor dies | Re-run → reads state → skips completed |
-| PDF fails | Report .md is saved. PDF stays pending |
+| URL inaccesible | Worker falla → conductor marca `failed`, siguiente |
+| JD detrás de login | Conductor intenta leer DOM. Si falla → `failed` |
+| Portal cambia layout | Conductor razona sobre HTML, se adapta |
+| Worker crashea | Conductor marca `failed`, siguiente. Retry con `--retry-failed` |
+| Conductor muere | Re-ejecutar → lee state → skip completadas |
+| PDF falla | Report .md se guarda. PDF queda pendiente |

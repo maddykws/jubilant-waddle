@@ -1,497 +1,266 @@
-# AI Powered Job Search (Clone of Career Ops)
+# Career-Ops
 
-> AI-powered job search pipeline built on Claude Code. Evaluate offers intelligently, generate tailored CVs, scan 45+ portals, and track everything — with token-optimized multi-tier AI routing.
+[English](README.md) | [Español](README.es.md)
 
-[![Claude Code](https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white)](https://claude.ai/code)
-[![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
-[![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white)](https://playwright.dev)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <a href="https://x.com/santifer"><img src="docs/hero-banner.jpg" alt="Career-Ops — Multi-Agent Job Search System" width="800"></a>
+</p>
+
+<p align="center">
+  <em>I spent months applying to jobs the hard way. So I engineered the system I wish I had.</em><br>
+  Companies use AI to filter candidates. <strong>I gave candidates AI to <em>choose</em> companies.</strong><br>
+  <em>Now it's open source.</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white" alt="Claude Code">
+  <img src="https://img.shields.io/badge/OpenCode-111827?style=flat&logo=terminal&logoColor=white" alt="OpenCode">
+  <img src="https://img.shields.io/badge/Codex_(soon)-6B7280?style=flat&logo=openai&logoColor=white" alt="Codex">
+  <img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white" alt="Go">
+  <img src="https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white" alt="Playwright">
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT">
+  <br>
+  <img src="https://img.shields.io/badge/EN-blue?style=flat" alt="EN">
+  <img src="https://img.shields.io/badge/ES-red?style=flat" alt="ES">
+  <img src="https://img.shields.io/badge/DE-grey?style=flat" alt="DE">
+  <img src="https://img.shields.io/badge/FR-blue?style=flat" alt="FR">
+  <img src="https://img.shields.io/badge/PT--BR-green?style=flat" alt="PT-BR">
+</p>
 
 ---
 
 <p align="center">
-  <img src="docs/demo-tokens.gif" alt="Token Optimization: Before vs After" width="800">
-  <br><em>Token usage before vs after — 82% reduction, $18.48 → $2.72/month</em>
+  <img src="docs/demo.gif" alt="Career-Ops Demo" width="800">
 </p>
 
-<p align="center">
-  <img src="docs/demo-pipeline.gif" alt="Live Pipeline Demo" width="800">
-  <br><em>Live pipeline — applications tracker, ghost detector, funding radar, ATS optimizer, follow-up scheduler, rejection analysis, negotiate mode, interview mode</em>
-</p>
-
----
+<p align="center"><strong>740+ job listings evaluated · 100+ personalized CVs · 1 dream role landed</strong></p>
 
 ## What Is This
 
-Career-ops turns Claude Code into a full job search command center. It is not a keyword-matching job board scraper. It is an AI reasoning pipeline that reads your CV and evaluates whether a role is genuinely worth your time.
+Career-Ops turns any AI coding CLI into a full job search command center. Instead of manually tracking applications in a spreadsheet, you get an AI-powered pipeline that:
 
-**What it does:**
+- **Evaluates offers** with a structured A-F scoring system (10 weighted dimensions)
+- **Generates tailored PDFs** -- ATS-optimized CVs customized per job description
+- **Scans portals** automatically (Greenhouse, Ashby, Lever, company pages)
+- **Processes in batch** -- evaluate 10+ offers in parallel with sub-agents
+- **Tracks everything** in a single source of truth with integrity checks
 
-- Evaluates job offers with a structured 6-block scoring system driven by AI reasoning against your actual CV
-- Generates ATS-optimized CVs tailored per job description, rendered as polished PDFs
-- Scans 45+ company career portals and job boards automatically
-- Pre-generates answers for application forms so applying takes minutes, not hours
-- Detects ghost jobs, tracks funding signals, and surfaces companies likely to hire before postings go live
-- Tracks everything in a single source of truth with pipeline integrity checks
+> **Important: This is NOT a spray-and-pray tool.** Career-ops is a filter -- it helps you find the few offers worth your time out of hundreds. The system strongly recommends against applying to anything scoring below 4.0/5. Your time is valuable, and so is the recruiter's. Always review before submitting.
 
-**Why it is different:**
+Career-ops is agentic: Claude Code navigates career pages with Playwright, evaluates fit by reasoning about your CV vs the job description (not keyword matching), and adapts your resume per listing.
 
-| Typical job search tool | Career-ops |
-|-------------------------|------------|
-| Keyword matching | AI reasoning against your actual CV |
-| Volume-focused | Quality-first — recommends against anything below 4.0/5 |
-| You fill forms manually | Answer bank pre-generates 25 standard answers once |
-| Static job alerts | Funding radar finds companies before jobs are posted |
-| Expensive at scale | 3-tier model routing: $2.72/month for 205 jobs |
+> **Heads up: the first evaluations won't be great.** The system doesn't know you yet. Feed it context -- your CV, your career story, your proof points, your preferences, what you're good at, what you want to avoid. The more you nurture it, the better it gets. Think of it as onboarding a new recruiter: the first week they need to learn about you, then they become invaluable.
 
-**Human-in-the-loop by design.** The system evaluates, recommends, and prepares — but never submits an application without you reviewing it first. You always have the final call.
-
-> The system gets smarter the more context you give it. Think of onboarding a new recruiter: the first week they need to learn about you, then they become invaluable.
-
-**Real numbers from a live run:** 210 jobs evaluated, 61 CVs generated, 3 scheduled daily LinkedIn scans (9am/3pm/6pm ET), 37 search keywords.
-
----
-
-## Architecture
-
-### 3-Tier Model Routing
-
-The core optimization is routing each job to the cheapest model that can handle it accurately.
-
-```
-Job URL / Description
-         │
-         ▼
-┌────────────────────────────────────────────────────────────┐
-│  Ghost Detector                                            │
-│  7-signal scoring: posting age, agency flags, clearance   │
-│  signals, "no longer accepting" text                       │
-│  Score ≥ 6 → SKIP immediately (0 eval tokens spent)       │
-└────────────────────┬───────────────────────────────────────┘
-                     │ passes ghost check
-                     ▼
-┌────────────────────────────────────────────────────────────┐
-│  TIER 1 — Haiku  (~380 tokens)                             │
-│  Hard-skip detection: location mismatch, visa block,       │
-│  seniority gap, compensation floor miss                    │
-│  → HARD SKIP: stop here (saves 95% tokens vs full eval)    │
-│  → CONTINUE: pass to Tier 2                                │
-└────────────────────┬───────────────────────────────────────┘
-                     │ passes hard-skip check
-                     ▼
-┌────────────────────────────────────────────────────────────┐
-│  TIER 2 — Sonnet  (~2,100 tokens)                          │
-│  Standard 6-block evaluation:                              │
-│  archetype / CV match / comp research /                    │
-│  personalization / gaps / STAR stories                     │
-│  Score < 4.3 or non-Tier-1 company → final report         │
-│  Score ≥ 4.3 + Tier-1 company → escalate to Tier 3        │
-└────────────────────┬───────────────────────────────────────┘
-                     │ score ≥ 4.3 + Tier-1 company
-                     ▼
-┌────────────────────────────────────────────────────────────┐
-│  TIER 3 — Opus  (deep analysis)                            │
-│  Reserved for: Anthropic, OpenAI, Google DeepMind, and     │
-│  equivalents. Full deep evaluation with expanded context.  │
-└────────────────────┬───────────────────────────────────────┘
-                     │
-                     ▼
-         Report + PDF + Tracker entry
-```
-
-### Optimization Layers (Compounding)
-
-Three systems work together to drive down cost:
-
-1. **Prompt caching** (`lib/cache-manager.mjs`) — Marks system prompt + profile context with `cache_control: ephemeral`. Break-even at call #2, profitable from call #3. Saves ~40% tokens on repeated context.
-2. **Model routing** (`lib/model-router.mjs`) — Routes each job to Haiku/Sonnet/Opus based on actual signal, not blanket rules.
-3. **Semantic dedup** (`lib/semantic-dedup.mjs`) — Pure JS TF-IDF cosine similarity (no external APIs). Threshold 0.82. Catches cross-platform duplicate listings before they consume any eval tokens.
-
----
+Built by someone who used it to evaluate 740+ job offers, generate 100+ tailored CVs, and land a Head of Applied AI role. [Read the full case study](https://santifer.io/career-ops-system).
 
 ## Features
 
-### Core Pipeline
-
 | Feature | Description |
 |---------|-------------|
-| **Auto-Pipeline** | Paste a URL → full evaluation + PDF + tracker entry, automated |
-| **6-Block Evaluation** | Archetype classification, CV match, comp research, personalization angles, gap analysis, STAR stories |
-| **Interview Story Bank** | Accumulates STAR+Reflection stories across evaluations into `interview-prep/story-bank.md` |
-| **ATS PDF Generation** | Keyword-injected CV with Space Grotesk + DM Sans, rendered via Playwright |
-| **Portal Scanner** | 45+ companies pre-configured across Ashby, Greenhouse, Lever, Wellfound, Workable |
-| **Batch Processing** | Parallel evaluation with `claude -p` sub-agents and worker pool concurrency |
-| **Pipeline Integrity** | Automated merge, dedup, status normalization, health checks via dedicated scripts |
-
-### Intelligence Layer
-
-| Feature | Description |
-|---------|-------------|
-| **Ghost Detector** | 7-signal scoring detects likely-dead listings before spending eval tokens. Signals: posting age >90d, staffing agency, clearance keywords, layoff signals, "no longer accepting" text |
-| **Funding Radar** | RSS scraper for TechCrunch AI + VentureBeat AI + Crunchbase News. Filters Series B+, >$20M, AI/ML/LLM. Finds companies likely to hire 60-90 days before jobs are posted |
-| **Semantic Dedup** | TF-IDF cosine similarity catches cross-platform duplicate listings. Threshold 0.82. Persists index to `data/dedup-index.json` |
-| **ATS Optimizer** | Haiku-powered keyword analysis (~200 tokens). Checks: keyword density (top 20 JD terms), section headers, date format, bullet structure (action verb → metric → result), format score 0-100 |
-
-### Application Automation
-
-| Feature | Description |
-|---------|-------------|
-| **Answer Bank** | Pre-generates 25 standard application answers via one Sonnet call, saved to `data/answer-bank.json`. Eliminates 94% of apply-flow LLM calls |
-| **Apply Agent** | 9-step form-fill flow: navigate → snapshot → Haiku field classification (~300 tokens) → fill standard fields from answer bank (0 tokens) → Sonnet custom answers (~600 tokens) → screenshot → STOP. ~900 tokens/app vs 16,000 naive. Never clicks Submit |
-| **LinkedIn Scraper** | 37 keyword variations: AI Engineer, LLM Engineer, GenAI Engineer, MLOps, RAG Engineer, and more. Integrates semantic dedup before writing to pipeline |
-
-### Analytics & Learning
-
-| Feature | Description |
-|---------|-------------|
-| **Funnel Dashboard** | Generates `dashboard/funnel.html` with Chart.js: pipeline funnel with conversion rates, score histogram, H1B pie, company tier analysis, daily rate line chart, location breakdown, action items |
-| **Follow-up Scheduler** | Day 7/14/21 follow-up cadence. Generates personalized 3-sentence follow-up messages via Sonnet. Logs to `data/follow-ups.json` |
-| **Rejection Analyzer** | Statistical + AI pattern analysis (needs 10+ rejections). Groups by company size, location, score range, role type. Time-to-rejection analysis. Outputs 3-5 actionable recommendations |
-
-### Modes
-
-| Mode | Trigger | Description |
-|------|---------|-------------|
-| `auto-pipeline` | Paste any JD/URL | Full pipeline: evaluate + report + PDF + tracker |
-| `oferta` | "evaluate this offer" | Single 6-block evaluation |
-| `ofertas` | "compare these offers" | Side-by-side offer comparison |
-| `compare` | "compare with COL adjustment" | Total comp normalization, COL adjustment, equity risk-discount by stage, 4-year scenario modeling |
-| `pdf` | "generate my CV" | ATS-optimized CV generation |
-| `scan` | "scan for new offers" | Portal scanner across 45+ companies |
-| `batch` | "batch evaluate" | Parallel batch with sub-agents |
-| `pipeline` | "process pipeline" | Process pending URLs from pipeline.md |
-| `tracker` | "show my pipeline" | Application status view |
-| `apply` | "fill this application" | AI-assisted form filling |
-| `contacto` | "LinkedIn message" | LinkedIn outreach draft |
-| `outreach` | "cold outreach" | 4-sentence message, <300 char connection note, follow-up template, logs to `data/outreach-log.md` |
-| `deep` | "research this company" | Deep company research |
-| `negotiate` | "help me negotiate" | Salary negotiation coach: offer extraction, Levels.fyi/Glassdoor benchmarking, BATNA, opening anchor script (10-15% above offer), pushback responses, walk-away threshold, email template |
-| `interview` | "prep for interview" | Interview intelligence briefing: company brief, 10 technical questions from JD, 5 behavioral questions, 3 STAR stories mapped from story-bank.md, 5 questions to ask. Saves to `interview-prep/` |
-| `training` | "evaluate this course" | Course/cert evaluation |
-| `project` | "evaluate this project" | Portfolio project evaluation |
-
----
-
-## Token Optimization
-
-Three compounding layers — prompt caching + model routing + semantic dedup — produce results that are not additive, they multiply.
-
-| Scenario | Before | After | Reduction |
-|----------|--------|-------|-----------|
-| Single evaluation | 8,200 tokens | 2,100 tokens | 74% |
-| Hard-skip (Haiku) | 8,200 tokens | 380 tokens | 95% |
-| Daily scan (30 jobs) | 246,000 tokens | 38,400 tokens | 84% |
-| 45 applications | 720,000 tokens | 40,500 tokens | 94% |
-| Full pipeline (205 jobs) | 1,681,000 tokens | 298,000 tokens | 82% |
-| **Monthly cost** | **$18.48** | **$2.72** | **85%** |
-
-**Why the savings compound:**
-- Prompt caching removes repeated context overhead on every call after the first
-- Model routing sends 60-70% of jobs to Haiku instead of Sonnet before they ever reach full evaluation
-- Semantic dedup prevents duplicate jobs from reaching the routing layer at all
-- Answer bank pre-generates standard application answers once, eliminating per-application LLM calls entirely
-
----
+| **Auto-Pipeline** | Paste a URL, get a full evaluation + PDF + tracker entry |
+| **6-Block Evaluation** | Role summary, CV match, level strategy, comp research, personalization, interview prep (STAR+R) |
+| **Interview Story Bank** | Accumulates STAR+Reflection stories across evaluations -- 5-10 master stories that answer any behavioral question |
+| **Negotiation Scripts** | Salary negotiation frameworks, geographic discount pushback, competing offer leverage |
+| **ATS PDF Generation** | Keyword-injected CVs with Space Grotesk + DM Sans design |
+| **Portal Scanner** | 45+ companies pre-configured (Anthropic, OpenAI, ElevenLabs, Retool, n8n...) + custom queries across Ashby, Greenhouse, Lever, Wellfound |
+| **Batch Processing** | Parallel evaluation with `claude -p` workers |
+| **Dashboard TUI** | Terminal UI to browse, filter, and sort your pipeline |
+| **Human-in-the-Loop** | AI evaluates and recommends, you decide and act. The system never submits an application -- you always have the final call |
+| **Pipeline Integrity** | Automated merge, dedup, status normalization, health checks |
 
 ## Quick Start
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/maddykws/jubilant-waddle.git
-cd jubilant-waddle && npm install
-npx playwright install chromium   # Required for PDF generation and portal scanning
+git clone https://github.com/santifer/career-ops.git
+cd career-ops && npm install
+npx playwright install chromium   # Required for PDF generation
 
-# 2. Configure
+# 2. Check setup
+npm run doctor                     # Validates all prerequisites
+
+# 3. Configure
 cp config/profile.example.yml config/profile.yml  # Edit with your details
-cp templates/portals.example.yml portals.yml       # Customize companies to scan
+cp templates/portals.example.yml portals.yml       # Customize companies
 
-# 3. Open Claude Code in this directory
-claude
+# 4. Add your CV
+# Create cv.md in the project root with your CV in markdown
 
-# Claude will detect the system is not set up and walk you through onboarding:
-# - Paste or describe your CV → creates cv.md
-# - Answer a few questions → fills config/profile.yml
-# - Portal config is set up automatically
+# 5. Personalize with Claude
+claude   # Open Claude Code in this directory
+
+# Then ask Claude to adapt the system to you:
+# "Change the archetypes to backend engineering roles"
+# "Translate the modes to English"
+# "Add these 5 companies to portals.yml"
+# "Update my profile with this CV I'm pasting"
+
+# 6. Start using
+# Paste a job URL or run /career-ops
 ```
 
-**The system onboards itself.** On first run, Claude detects missing files and guides you step by step through CV, profile, and portal setup before doing anything else.
+> **The system is designed to be customized by Claude itself.** Modes, archetypes, scoring weights, negotiation scripts -- just ask Claude to change them. It reads the same files it uses, so it knows exactly what to edit.
 
-**The system is designed to be customized by Claude itself.** Modes, archetypes, scoring weights, negotiation scripts — just ask. Claude reads the same files it uses, so it knows exactly what to edit.
-
-```
-"Change the archetypes to data engineering roles"
-"Add these 10 companies to my portal scanner"
-"Update my CV with this new role I just started"
-"Translate the modes to French"
-"Adjust scoring weights to prioritize remote-first companies"
-```
-
----
+See [docs/SETUP.md](docs/SETUP.md) for the full setup guide.
 
 ## Usage
 
-### Slash Command Modes
+Career-ops is a single slash command with multiple modes:
 
 ```
-/career-ops                        → Show all available commands
-/career-ops {paste URL or JD}      → Full auto-pipeline
-/career-ops scan                   → Scan portals for new offers
-/career-ops pdf                    → Generate ATS-optimized CV
-/career-ops batch                  → Batch evaluate multiple offers
-/career-ops tracker                → View application status
-/career-ops apply                  → Fill application forms
-/career-ops pipeline               → Process pending URLs from pipeline.md
-/career-ops contacto               → LinkedIn outreach message
-/career-ops outreach               → Cold outreach campaign
-/career-ops deep                   → Deep company research
-/career-ops negotiate              → Salary negotiation coach
-/career-ops interview              → Interview intelligence briefing
-/career-ops compare                → Compare offers with COL + equity modeling
-/career-ops training               → Evaluate a course or certification
-/career-ops project                → Evaluate a portfolio project
+/career-ops                → Show all available commands
+/career-ops {paste a JD}   → Full auto-pipeline (evaluate + PDF + tracker)
+/career-ops scan           → Scan portals for new offers
+/career-ops pdf            → Generate ATS-optimized CV
+/career-ops batch          → Batch evaluate multiple offers
+/career-ops tracker        → View application status
+/career-ops apply          → Fill application forms with AI
+/career-ops pipeline       → Process pending URLs
+/career-ops contacto       → LinkedIn outreach message
+/career-ops deep           → Deep company research
+/career-ops training       → Evaluate a course/cert
+/career-ops project        → Evaluate a portfolio project
 ```
 
-Or just paste a job URL or description directly — career-ops auto-detects it and runs the full pipeline.
-
-### Node Scripts
-
-```bash
-# Answer bank — pre-generate standard application answers
-npm run answer-bank generate           # One Sonnet call, saves 25 answers
-npm run answer-bank lookup "question"  # Find a matching answer
-
-# Application form filling
-npm run apply 028                      # Fill forms for report #028
-npm run apply -- --tier 4.2            # Fill all applications with score ≥ 4.2
-npm run apply -- --today               # Fill all of today's applications
-npm run apply -- --dry-run 028         # Preview without navigating
-
-# Intelligence tools
-npm run ghost-check                    # Run ghost detector on pipeline
-npm run funding-radar                  # Scrape funding news, find pre-posting hires
-npm run ats-check 028                  # ATS keyword analysis for report #028
-
-# Analytics
-npm run dashboard                      # Generate funnel.html dashboard
-npm run follow-up check                # Check which applications need follow-up
-npm run follow-up message 028          # Generate follow-up message for #028
-npm run follow-up done 028             # Mark follow-up as sent
-npm run rejection-analysis             # Run rejection pattern analysis (needs 10+)
-
-# LinkedIn scraper
-node scrape-linkedin.mjs               # Scrape with 37 keyword variations
-
-# Pipeline maintenance
-npm run verify                         # Health check: reports, statuses, links
-npm run dedup                          # Deduplicate tracker entries
-npm run merge                          # Merge TSV tracker additions into applications.md
-node normalize-statuses.mjs            # Normalize all statuses to canonical values
-```
-
----
-
-## New Features Deep Dive
-
-### Apply Automation
-
-The answer bank + apply agent combination reduces application effort from 20+ minutes to under 5.
-
-1. Run `npm run answer-bank generate` once. This makes a single Sonnet call and saves 25 pre-generated answers for standard questions ("Tell me about yourself", "Why this company", "Describe a challenge you overcame") to `data/answer-bank.json`.
-2. When applying, `npm run apply 028` runs a 9-step flow: navigate to the form → snapshot → Haiku classifies each field (~300 tokens) → standard fields are filled from answer bank (0 tokens) → custom/role-specific questions go to Sonnet (~600 tokens) → screenshot for review → STOP.
-3. You review and click Submit yourself. The agent never does.
-
-Total cost per application: ~900 tokens. Naive approach: ~16,000 tokens. 94% reduction.
-
-### Intelligence Features
-
-**Ghost Detector** scores job postings on 7 signals before spending evaluation tokens. Any listing scoring ≥6 is skipped immediately. Typical ghost signals: the posting is >90 days old (+3 points), it comes from a staffing agency (+2), or contains clearance/layoff language (+2). Running this on your pipeline before batch evaluation can eliminate 20-30% of listings as dead.
-
-**Funding Radar** monitors RSS feeds from TechCrunch AI, VentureBeat AI, and Crunchbase News. It filters for Series B+, >$20M rounds in AI/ML/LLM companies and saves results to `reports/funding-radar-{date}.md`. Companies that just closed a round typically hire aggressively 60-90 days later — before jobs appear on boards.
-
-**ATS Optimizer** analyzes your generated CV against a specific JD using Haiku. It extracts the top 20 keywords from the JD and checks keyword density, section header conventions, date formatting, and bullet structure (action verb → metric → result). Returns a score 0-100 with specific gaps to fix.
-
-### Analytics
-
-**Funnel Dashboard** (`npm run dashboard`) generates a self-contained `dashboard/funnel.html` file with Chart.js visualizations: pipeline funnel with stage conversion rates, score distribution histogram, H1B/visa eligibility breakdown, company tier heatmap, daily application rate line chart, location breakdown, and a prioritized action items list.
-
-**Rejection Analyzer** (`npm run rejection-analysis`) needs at least 10 rejections to run meaningfully. It groups rejections by company size, location, score range at application time, and role type, then runs time-to-rejection analysis. It outputs 3-5 specific, actionable recommendations to `reports/rejection-analysis-{date}.md`. Run this monthly to recalibrate your targeting.
-
-**Follow-up Scheduler** tracks which applications are at day 7, 14, or 21 since submission. `npm run follow-up check` shows what needs attention. `npm run follow-up message 028` generates a personalized 3-sentence follow-up via Sonnet using the original JD context.
-
-### New Modes
-
-**negotiate** — Full salary negotiation framework. Extracts the offer into a structured table, benchmarks against Levels.fyi/Glassdoor/Blind comps for the role and location, analyzes your BATNA, generates an opening anchor script targeting 10-15% above the offer, prepares pushback responses for 5 common counter-arguments, sets a walk-away threshold, and outputs a ready-to-send negotiation email.
-
-**interview** — Pre-interview intelligence briefing. Researches the company, generates 10 technical questions drawn directly from the JD, 5 behavioral questions, maps 3 of your strongest STAR stories from `interview-prep/story-bank.md` to the role's key requirements, and suggests 5 sharp questions to ask the interviewer. Saved to `interview-prep/{num}-{company}-prep.md`.
-
-**compare** — Offer comparison with financial modeling. Normalizes total comp across salary/equity/bonus, applies cost-of-living adjustment (NYC/SF/Remote tiers), applies equity risk discount by company stage, and builds a 4-year scenario model with conservative/base/optimistic projections for each offer. Outputs a ranked recommendation with rationale.
-
-**outreach** — Cold outreach assistant. Researches the target's LinkedIn profile, drafts a 4-sentence personalized message, generates a <300 character connection note, and creates a follow-up template. Logs all outreach to `data/outreach-log.md` to prevent duplicate contacts.
-
----
+Or just paste a job URL or description directly -- career-ops auto-detects it and runs the full pipeline.
 
 ## How It Works
 
 ```
 You paste a job URL or description
-               │
-               ▼
-   ┌───────────────────────┐
-   │   Ghost Detector      │  7-signal scoring
-   │   score ≥ 6 → SKIP    │  (0 eval tokens)
-   └───────────┬───────────┘
-               │ passes
-               ▼
-   ┌───────────────────────┐
-   │   Semantic Dedup      │  TF-IDF cosine 0.82
-   │   match → SKIP        │  (no API calls)
-   └───────────┬───────────┘
-               │ unique
-               ▼
-   ┌───────────────────────┐
-   │   Model Router        │
-   │   Tier 1: Haiku       │  hard-skip? → stop
-   │   Tier 2: Sonnet      │  standard eval
-   │   Tier 3: Opus        │  score≥4.3 + top co.
-   └───────────┬───────────┘
-               │
-               ▼
-   ┌───────────────────────┐
-   │   Worker Pool         │  p-limit (5 workers)
-   │   .seq-lock atomic    │  sequential numbering
-   └───────────┬───────────┘
-               │
-       ┌───────┼────────┐
-       ▼       ▼        ▼
-    Report    PDF    Tracker
-     .md      .pdf    .tsv
-               │
-               ▼
-   ┌───────────────────────┐
-   │   ATS Optimizer       │  keyword gap check
-   └───────────┬───────────┘
-               │
-               ▼
-   ┌───────────────────────┐
-   │   Apply Agent         │  answer bank + form fill
-   │   STOP before Submit  │  you review + click
-   └───────────────────────┘
+        │
+        ▼
+┌──────────────────┐
+│  Archetype       │  Classifies: LLMOps / Agentic / PM / SA / FDE / Transformation
+│  Detection       │
+└────────┬─────────┘
+         │
+┌────────▼─────────┐
+│  A-F Evaluation  │  Match, gaps, comp research, STAR stories
+│  (reads cv.md)   │
+└────────┬─────────┘
+         │
+    ┌────┼────┐
+    ▼    ▼    ▼
+ Report  PDF  Tracker
+  .md   .pdf   .tsv
 ```
 
----
+## Pre-configured Portals
+
+The scanner comes with **45+ companies** ready to scan and **19 search queries** across major job boards. Copy `templates/portals.example.yml` to `portals.yml` and add your own:
+
+**AI Labs:** Anthropic, OpenAI, Mistral, Cohere, LangChain, Pinecone
+**Voice AI:** ElevenLabs, PolyAI, Parloa, Hume AI, Deepgram, Vapi, Bland AI
+**AI Platforms:** Retool, Airtable, Vercel, Temporal, Glean, Arize AI
+**Contact Center:** Ada, LivePerson, Sierra, Decagon, Talkdesk, Genesys
+**Enterprise:** Salesforce, Twilio, Gong, Dialpad
+**LLMOps:** Langfuse, Weights & Biases, Lindy, Cognigy, Speechmatics
+**Automation:** n8n, Zapier, Make.com
+**European:** Factorial, Attio, Tinybird, Clarity AI, Travelperk
+
+**Job boards searched:** Ashby, Greenhouse, Lever, Wellfound, Workable, RemoteFront
+
+## Dashboard TUI
+
+The built-in terminal dashboard lets you browse your pipeline visually:
+
+```bash
+cd dashboard
+go build -o career-dashboard .
+./career-dashboard --path ..
+```
+
+Features: 6 filter tabs, 4 sort modes, grouped/flat view, lazy-loaded previews, inline status changes.
 
 ## Project Structure
 
 ```
 career-ops/
-├── CLAUDE.md                        # Agent instructions and mode routing
-├── cv.md                            # Your CV — canonical source of truth (you create this)
-├── article-digest.md                # Proof points from your portfolio (optional)
-│
-├── lib/                             # Optimization layer
-│   ├── cache-manager.mjs            # Prompt caching with cache_control ephemeral
-│   ├── model-router.mjs             # 3-tier routing: Haiku / Sonnet / Opus
-│   ├── worker-pool.mjs              # p-limit concurrency + .seq-lock atomic numbering
-│   └── semantic-dedup.mjs           # TF-IDF cosine similarity, threshold 0.82
-│
-├── modes/                           # Skill modes (English)
-│   ├── _shared.md                   # Shared eval context and archetypes
-│   ├── _profile.md                  # Your customizations (never auto-updated)
-│   ├── _profile.template.md         # Template for _profile.md
-│   ├── oferta.md                    # Single offer evaluation
-│   ├── auto-pipeline.md             # Full pipeline on URL paste
-│   ├── pdf.md                       # ATS CV generation
-│   ├── scan.md                      # Portal scanner
-│   ├── batch.md                     # Parallel batch evaluation
-│   ├── pipeline.md                  # Process pending pipeline
-│   ├── tracker.md                   # Application status view
-│   ├── apply.md                     # Form filling
-│   ├── contacto.md                  # LinkedIn outreach
-│   ├── outreach.md                  # Cold outreach
-│   ├── deep.md                      # Deep company research
-│   ├── negotiate.md                 # Salary negotiation coach
-│   ├── interview.md                 # Interview intelligence briefing
-│   ├── compare.md                   # Offer comparison with COL + equity modeling
-│   ├── ofertas.md                   # Side-by-side offer comparison
-│   ├── training.md                  # Course/cert evaluation
-│   └── project.md                   # Portfolio project evaluation
-│
-├── modes/de/                        # German modes (DACH market)
-│   ├── _shared.md                   # German shared context
-│   ├── angebot.md                   # German offer evaluation
-│   ├── bewerben.md                  # German apply mode
-│   └── pipeline.md                  # German pipeline mode
-│
+├── CLAUDE.md                    # Agent instructions
+├── cv.md                        # Your CV (create this)
+├── article-digest.md            # Your proof points (optional)
 ├── config/
-│   ├── profile.example.yml          # Template for your profile
-│   └── profile.yml                  # Your profile (you create this)
-│
+│   └── profile.example.yml      # Template for your profile
+├── modes/                       # 14 skill modes
+│   ├── _shared.md               # Shared context (customize this)
+│   ├── oferta.md                # Single evaluation
+│   ├── pdf.md                   # PDF generation
+│   ├── scan.md                  # Portal scanner
+│   ├── batch.md                 # Batch processing
+│   └── ...
 ├── templates/
-│   ├── cv-template.html             # ATS-optimized HTML CV template
-│   ├── portals.example.yml          # 45+ portal/company scanner config
-│   └── states.yml                   # Canonical application statuses
-│
+│   ├── cv-template.html         # ATS-optimized CV template
+│   ├── portals.example.yml      # Scanner config template
+│   └── states.yml               # Canonical statuses
 ├── batch/
-│   ├── batch-prompt.md              # Self-contained worker prompt
-│   └── tracker-additions/           # Per-evaluation TSV files (pre-merge)
-│
-├── data/                            # Your tracking data (gitignored)
-│   ├── applications.md              # Application tracker (10 columns)
-│   ├── pipeline.md                  # Pending URLs queue
-│   ├── scan-history.tsv             # URL dedup history
-│   ├── dedup-index.json             # Semantic dedup index
-│   ├── answer-bank.json             # Pre-generated application answers
-│   ├── follow-ups.json              # Follow-up log
-│   └── outreach-log.md              # Cold outreach log
-│
-├── reports/                         # Evaluation reports (gitignored)
-├── output/                          # Generated PDFs (gitignored)
-├── interview-prep/                  # Interview briefs + story bank
-│   └── story-bank.md                # Accumulated STAR+R stories
-│
-├── fonts/                           # Space Grotesk + DM Sans
-├── docs/                            # Setup and architecture docs
-│
-├── scrape-linkedin.mjs              # LinkedIn scraper (37 keyword variations)
-├── answer-bank.mjs                  # Answer pre-generation and lookup
-├── apply-agent.mjs                  # Non-auto-apply form filler
-├── funding-radar.mjs                # RSS funding signal scraper
-├── ghost-detector.mjs               # Ghost job 7-signal scorer
-├── ats-optimizer.mjs                # ATS keyword gap analysis
-├── funnel-dashboard.mjs             # Chart.js funnel dashboard generator
-├── follow-up-scheduler.mjs          # Day 7/14/21 follow-up cadence
-├── rejection-analyzer.mjs           # Statistical rejection pattern analysis
-├── generate-pdf.mjs                 # Playwright HTML → PDF renderer
-├── merge-tracker.mjs                # TSV merge into applications.md
-├── verify-pipeline.mjs              # Pipeline health checks
-├── dedup-tracker.mjs                # Tracker entry deduplication
-├── normalize-statuses.mjs           # Canonical status normalization
-└── portals.yml                      # Your portal config (you create this)
+│   ├── batch-prompt.md          # Self-contained worker prompt
+│   └── batch-runner.sh          # Orchestrator script
+├── dashboard/                   # Go TUI pipeline viewer
+├── data/                        # Your tracking data (gitignored)
+├── reports/                     # Evaluation reports (gitignored)
+├── output/                      # Generated PDFs (gitignored)
+├── fonts/                       # Space Grotesk + DM Sans
+├── docs/                        # Setup, customization, architecture
+└── examples/                    # Sample CV, report, proof points
 ```
-
----
 
 ## Tech Stack
 
-[![Claude Code](https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white)](https://claude.ai/code)
-[![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
-[![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white)](https://playwright.dev)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Claude Code](https://img.shields.io/badge/Claude_Code-000?style=flat&logo=anthropic&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=node.js&logoColor=white)
+![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat&logo=playwright&logoColor=white)
+![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)
+![Bubble Tea](https://img.shields.io/badge/Bubble_Tea-FF75B5?style=flat&logo=go&logoColor=white)
 
-| Layer | Technology |
-|-------|-----------|
-| Agent runtime | Claude Code with custom skill modes |
-| LLM routing | Anthropic API — Haiku / Sonnet / Opus via `lib/model-router.mjs` |
-| Token caching | `cache_control: ephemeral` via `lib/cache-manager.mjs` |
-| PDF rendering | Playwright + HTML/CSS template (Space Grotesk + DM Sans) |
-| Semantic dedup | Pure JS TF-IDF cosine similarity — no external dependencies |
-| Portal scanning | Playwright + Greenhouse API + WebSearch |
-| Concurrency | p-limit worker pool with atomic `.seq-lock` file |
-| Data format | Markdown tables + YAML config + TSV batch files + JSON indexes |
-| Dashboard | Chart.js (self-contained HTML, no build step) |
+- **Agent**: Claude Code with custom skills and modes
+- **PDF**: Playwright/Puppeteer + HTML template
+- **Scanner**: Playwright + Greenhouse API + WebSearch
+- **Dashboard**: Go + Bubble Tea + Lipgloss (Catppuccin Mocha theme)
+- **Data**: Markdown tables + YAML config + TSV batch files
 
----
+## Also Open Source
+
+- **[cv-santiago](https://github.com/santifer/cv-santiago)** -- The portfolio website (santifer.io) with AI chatbot, LLMOps dashboard, and case studies. If you need a portfolio to showcase alongside your job search, fork it and make it yours.
+
+## About the Author
+
+I'm Santiago -- Head of Applied AI, former founder (built and sold a business that still runs with my name on it). I built career-ops to manage my own job search. It worked: I used it to land my current role.
+
+My portfolio and other open source projects → [santifer.io](https://santifer.io)
+
+☕ [Buy me a coffee](https://buymeacoffee.com/santifer) if career-ops helped your job search.
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=santifer%2Fcareer-ops&type=timeline&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=santifer/career-ops&type=timeline&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=santifer/career-ops&type=timeline&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=santifer/career-ops&type=timeline&legend=top-left" />
+ </picture>
+</a>
+
+## Disclaimer
+
+**career-ops is a local, open-source tool — NOT a hosted service.** By using this software, you acknowledge:
+
+1. **You control your data.** Your CV, contact info, and personal data stay on your machine and are sent directly to the AI provider you choose (Anthropic, OpenAI, etc.). We do not collect, store, or have access to any of your data.
+2. **You control the AI.** The default prompts instruct the AI not to auto-submit applications, but AI models can behave unpredictably. If you modify the prompts or use different models, you do so at your own risk. **Always review AI-generated content for accuracy before submitting.**
+3. **You comply with third-party ToS.** You must use this tool in accordance with the Terms of Service of the career portals you interact with (Greenhouse, Lever, Workday, LinkedIn, etc.). Do not use this tool to spam employers or overwhelm ATS systems.
+4. **No guarantees.** Evaluations are recommendations, not truth. AI models may hallucinate skills or experience. The authors are not liable for employment outcomes, rejected applications, account restrictions, or any other consequences.
+
+See [LEGAL_DISCLAIMER.md](LEGAL_DISCLAIMER.md) for full details. This software is provided under the [MIT License](LICENSE) "as is", without warranty of any kind.
 
 ## License
 
 MIT
+
+## Let's Connect
+
+[![Website](https://img.shields.io/badge/santifer.io-000?style=for-the-badge&logo=safari&logoColor=white)](https://santifer.io)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/santifer)
+[![X](https://img.shields.io/badge/X-000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/santifer)
+[![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:hi@santifer.io)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/santifer)

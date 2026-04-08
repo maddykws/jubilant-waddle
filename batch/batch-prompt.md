@@ -138,6 +138,24 @@ Top 5 cambios al CV + Top 5 cambios a LinkedIn.
 - 1 case study recomendado (cuál proyecto presentar y cómo)
 - Preguntas red-flag y cómo responderlas
 
+#### Bloque G — Project Opportunity Intelligence
+
+**For every job, regardless of score, answer:**
+
+1. **What are they building?** (2-3 sentences max — what product, what technical problem, what outcome)
+2. **Project opportunity:**
+
+| Type | Verdict | Suggested Project |
+|------|---------|------------------|
+| Personal Project | ✅ Yes / ❌ No | 1-sentence idea |
+| Production-Level Project | ✅ Yes / ❌ No | 1-sentence idea |
+
+**Decision criteria:**
+- **Personal Project** = Can be built solo in 1-4 weeks to demonstrate the core tech. Adds to portfolio. Answers: "Can you show me something like what we build?"
+- **Production Project** = Requires real infra, data, or scale. Worth building as a side project or OSS contribution that mirrors their stack. Answers: "Have you shipped something similar at this scale?"
+- Mark both ✅ if applicable (most AI roles will have both)
+- Mark ❌ only if the domain is too narrow/proprietary to meaningfully replicate (e.g. HIPAA-locked clinical data, exchange-level HFT systems)
+
 #### Score Global
 
 | Dimensión | Score |
@@ -189,6 +207,9 @@ Donde `{company-slug}` es el nombre de empresa en lowercase, sin espacios, con g
 
 ## F) Plan de Entrevistas
 (contenido completo)
+
+## G) Project Opportunity Intelligence
+(contenido completo — what they're building + personal/production project verdicts)
 
 ---
 
@@ -277,9 +298,9 @@ Escribir una línea TSV a:
 batch/tracker-additions/{{ID}}.tsv
 ```
 
-Formato TSV (una sola línea, sin header, 9 columnas tab-separated):
+Formato TSV (una sola línea, sin header, 10 columnas tab-separated):
 ```
-{next_num}\t{{DATE}}\t{empresa}\t{rol}\t{status}\t{score}/5\t{pdf_emoji}\t[{{REPORT_NUM}}](reports/{{REPORT_NUM}}-{company-slug}-{{DATE}}.md)\t{nota_1_frase}
+{next_num}\t{{DATE}}\t{empresa}\t{rol}\t{status}\t{score}/5\t{pdf_emoji}\t[{{REPORT_NUM}}](reports/{{REPORT_NUM}}-{company-slug}-{{DATE}}.md)\t{nota_1_frase}\t{project_opp}
 ```
 
 **Columnas TSV (orden exacto):**
@@ -295,6 +316,7 @@ Formato TSV (una sola línea, sin header, 9 columnas tab-separated):
 | 7 | pdf | emoji | `✅` o `❌` | Si se generó PDF |
 | 8 | report | md link | `[647](reports/647-...)` | Link al report |
 | 9 | notes | string | `APPLY HIGH...` | Resumen 1 frase |
+| 10 | project_opp | string | `🧪 Personal: eval harness · 🏭 Prod: multi-agent pipeline` | From Bloque G. Format: `🧪 Personal: {idea} · 🏭 Prod: {idea}` or `❌ N/A` |
 
 **IMPORTANTE:** El orden TSV tiene status ANTES de score (col 5→status, col 6→score). En applications.md el orden es inverso (col 5→score, col 6→status). merge-tracker.mjs maneja la conversión.
 
