@@ -1,0 +1,35 @@
+{
+  "_comment": "Apify actor: curious_coder/linkedin-search-scraper or bebity/linkedin-premium-actor — LinkedIn people search for technical recruiters at NC AI/ML employers",
+  "_actor_suggestions": [
+    "curious_coder/linkedin-search-scraper",
+    "bebity/linkedin-premium-actor",
+    "harvestapi/linkedin-profile-scraper"
+  ],
+  "_usage": "npx apify call curious_coder/linkedin-search-scraper --input ./apify-recruiter-search.json",
+  "searchQueries": [
+    "\"Technical Recruiter\" \"Bank of America\" Charlotte AI ML",
+    "\"Senior Recruiter\" \"Bank of America\" Charlotte AI engineer",
+    "\"Technical Recruiter\" \"Wells Fargo\" Charlotte AI ML",
+    "\"Senior Recruiter\" \"Wells Fargo\" Charlotte machine learning",
+    "\"Technical Recruiter\" \"Lowe's\" OR \"Lowes\" Mooresville Charlotte AI",
+    "\"Technical Recruiter\" \"Fidelity Investments\" Durham Raleigh AI ML",
+    "\"Technical Recruiter\" \"Red Hat\" Raleigh Durham AI ML",
+    "\"Technical Recruiter\" \"IBM\" Research Triangle RTP AI watsonx",
+    "\"Technical Recruiter\" \"SAS Institute\" Cary NC AI ML",
+    "\"Technical Recruiter\" \"Lenovo\" Morrisville NC AI infrastructure",
+    "\"Technical Recruiter\" \"Pennymac\" Cary NC AI",
+    "\"Technical Recruiter\" \"Capgemini\" North Carolina AI GenAI",
+    "\"AI Engineering Manager\" \"Bank of America\" Charlotte",
+    "\"AI Engineering Manager\" \"Wells Fargo\" Charlotte",
+    "\"Head of AI\" OR \"VP AI\" Charlotte Raleigh Durham",
+    "\"GenAI Engineering Lead\" Charlotte OR Raleigh"
+  ],
+  "searchType": "people",
+  "location": "North Carolina, United States",
+  "maxItems": 200,
+  "proxyConfiguration": {
+    "useApifyProxy": true,
+    "apifyProxyGroups": ["RESIDENTIAL"]
+  },
+  "cookie": "PASTE_YOUR_LI_AT_COOKIE_HERE"
+}
